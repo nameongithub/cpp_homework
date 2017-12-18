@@ -1,6 +1,5 @@
 #include<iostream>
 
-#include<iostream>
 using namespace std;
 typedef long long ll;
 long long length;
@@ -23,6 +22,13 @@ int main(){
 			*(p + count++) = temple ;
 			*(min + count - 1) = 0;
 	}
+	if (length>1)
+		for (long long i = length - 1; i > 0; i--){
+			for (ll j = i; j >= 0; j--){
+				*(p + (i + 1)*i / 2 + j) = *(p + (i + 1)*i / 2 + j) + ;
+		}
+	}
+	cout << *p << endl;
 	ll sum = getMin(0,0);
 	cout << sum;
 }
