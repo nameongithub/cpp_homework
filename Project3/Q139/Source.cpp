@@ -1,227 +1,175 @@
 #include<iostream>
 #include<string>
 #include<vector>
-#include<sstream>
+
 using namespace std;
-// 实现类的功能
-class ploy{
+class Polygon{
+protected:
+	string polygonid;
+	int red, green, blue;
 public:
-	int r;
-	int g;
-	int b;
-	string id;
-	string shuxing;
-	vector<string> groupid;
-	ploy(){
-		r = 0;
-		g = 0;
-		b = 0;
+	Polygon(string polygonid, int red, int green, int blue) :polygonid(polygonid), red(red), green(green), blue(blue){}
+	virtual void setColor(int r, int g, int b) = 0;
+	virtual int getNum() = 0;
+	virtual string getName() = 0;
+	virtual double grayValue() = 0;
+	virtual void print() = 0;
+};
+class normalPolygon :public Polygon{
+public:
+	normalPolygon(string polygonid, int red, int green, int blue) :Polygon(polygonid, red, green, blue){}
+	void setColor(int r, int g, int b)override{
+		red = r;
+		green = g;
+		blue = b;
 	}
-	ploy(string i){
-		id = i;
-		r = 0;
-		g = 0;
-		b = 0;
+	int getNum()override{
+		return stoi(polygonid.substr(1);
 	}
-	ploy(string i, string s){
-		id = i;
-		r = 0;
-		g = 0;
-		b = 0;
-		shuxing = s;
+	string getName()override{
+		return polygonid;
 	}
-	friend ostream& operator << (ostream& o, ploy& p){
-		return o << p.id << " " << p.r << " " << p.g << " " << p.b<<endl;
+	double grayValue()override{
+		return red*0.299 + green*0.587 + blue*0.114;
 	}
-	double getGray(){
-	 return r * 0.299 + g * 0.587 + b * 0.114;
-	}
-	void addGroupID(string s){
-		groupid.push_back(s);
-	}
-	bool isBelonged(const string& groupID) const{
-		for (int i = 0; i < groupid.size(); i++){
-			if (groupID == groupid[i])
-				return true;
-		}
-		return false;
-	}
-	void setRGB(int red, int green, int blue){
-		if (shuxing == "normal")
-		{
-			r = red;
-			g = green;
-			b = blue;
-			return;
-		}
-		
-		if (shuxing == "single"){
-			r = red;
-			g = 0;
-			b = 0;
-			return;
-		}
-		if (shuxing == "reverse"){
-			r = 255 - red;
-			g = 255 - green;
-			b = 255 - blue;
-		}
-	}
-	void setID(string s){
-		id = s;
+	void print()override{
+		cout << polygonid << " " << red << " " << green << " " << blue;
 	}
 };
-vector<ploy*> ploys;
-vector<string> groupIDS;
-
-//找到对应编号的矩阵的索引
-int findIndex(string id){
-	for (int i = 0; i < ploys.size(); i++){
-		if (id == ploys[i]->id)
-			return i;
+class reversePolygon :public Polygon{
+public:
+	reversePolygon(string polygonid, int red, int green, int blue) :Polygon(polygonid, red, green, blue){}
+	void setColor(int r, int g, int b)override{
+		red = 255 - r;
+		green = 255 - g;
+		blue = 255 - b;
 	}
-	return -1;
-}
+	int getNum()override{
+		return stoi(polygonid.substr(1));
+	}
+	string getName()override{
+		return polygonid;
+	}
+	double grayValue()override{
+		return red*0.299 + green*0.587 + blue*0.114;
+	}
+	void print()override{
+		cout << polygonid << " " << red << " " << green << " " << blue;
+	}
+};
+class singlePolygon :public Polygon{
+public:
+	singlePolygon(string polygonid, int red, int green, int blue) :Polygon(polygonid, red, green, blue){}
+	void setColor(int r, int g, int b)override{
+		red = r;
+		green = 0;
+		blue = 0;
+	}
+	int getNum()override{
+		return stoi(polygonid.substr(1));
+	}
+	string getName()override{
+		return polygonid;
+	}
+	double grayValue()override{
+		return red*0.299 + green*0.587 + blue*0.114;
+	}
+	void print()override{
+		cout << polygonid << " " << red << " " << green << " " << blue;
+	}
+};
 
-//强行根据字节码比较数字大小
-int compareID( const string & id1,const string & id2){
-	string i1 = id1.substr(1);
-	string i2 = id2.substr(1);
-	if (i1.size() > i2.size())
-		return -1;
-	if (i1.size() < i2.size())
-		return 1;
-	if (i1 <= i2)
-		return 1;
-	return -1;
+vector<Polygon*> list;
+void operation(){
+	string op;
+	cin >> op;
+	if (op == "Add"){
+		cin >> op;
+		if (op == "normal"){
+			cin >> op;
+			normalPolygon* polygon = new normalPolygon(op, 0, 0, 0);
+			list.push_back(polygon);
+		}
+		else if (op == "single"){
+			cin >> op;
+			singlePolygon* polygon = new singlePolygon(op, 0, 0, 0);
+			list.push_back(polygon);
+		}
+		else if (op == "reverse"){
+			cin >> op;
+			reversePolygon* polygon = new reversePolygon(op, 0, 0, 0);
+			list.push_back(polygon);
+		}
+	}
+	else if (op == "Set"){
+		cin >> op;
+		for (int i = 0; i < list.size(); i++){
+			if (list[i]->getName() == op){
+				int red = 0, green = 0, blue = 0;
+				cin >> red >> green >> blue;
+				list[i]->setColor(red, green, blue);
+			}
+		}
+	}
 }
-//根据灰度排序
-void sortByGray(){
-	for (int i = 0; i < ploys.size(); i++){
-		for (int j = 0; j < ploys.size() - 1; j++){
-			if (ploys[j]->getGray() == ploys[j + 1]->getGray()){
-				if (compareID(ploys[j]->id, ploys[j + 1]->id) < 0)
-
-				{
-					ploy * temple = ploys[j];
-					ploys[j] = ploys[j + 1];
-					ploys[j + 1] = temple;
+void normalSort(){
+	for (int i = 0; i < list.size() - 1; i++){
+		for (int j = i + 1; j < list.size(); j++){
+			if (list[i]->getNum() > list[j]->getNum()){
+				Polygon* tmp;
+				tmp = list[j];
+				list[j] = list[i];
+				list[i] = tmp;
+			}
+		}
+	}
+}
+void graySort(){
+	for (int i = 0; i < list.size() - 1; i++){
+		for (int j = i + 1; j < list.size(); j++){
+			if (list[i]->grayValue() > list[j]->grayValue()){
+				Polygon* tmp;
+				tmp = list[j];
+				list[j] = list[i];
+				list[i] = tmp;
+			}
+			else if (list[i]->grayValue() == list[j]->grayValue()){
+				if (list[i]->getNum() > list[j]->getNum()){
+					Polygon* tmp;
+					tmp = list[j];
+					list[j] = list[i];
+					list[i] = tmp;
 				}
 			}
-
-			if (ploys[j]->getGray()>ploys[j+1]->getGray()){
-				ploy * temple = ploys[j];
-				ploys[j] = ploys[j + 1];
-				ploys[j + 1] = temple;
-			}
 		}
 	}
 }
-//根据ID排序
-void sortByID(){
-	for (int i = 0; i < ploys.size(); i++){
-		for (int j = 0; j < ploys.size() - 1; j++){
-			int result = compareID(ploys[j]->id, ploys[j + 1]->id);
-
-			if (result < 0){
-				ploy * temple =	ploys[j];
-				ploys[j] = ploys[j + 1];
-				ploys[j + 1] = temple;
-			}
+void sort(){
+	string op;
+	cin >> op;
+	if (op == "Normal"){
+		normalSort();
+	}
+	else if (op == "Gray"){
+		graySort();
+	}
+}
+void output(){
+	for (int i = 0; i < list.size(); i++){
+		list[i]->print();
+		if (i != list.size() - 1){
+			cout << endl;
 		}
 	}
 }
-//根据ID打印出来
-void printById(){
-		sortByID();
-		for (int i = 0; i < ploys.size(); i++){
-			cout << *ploys[i];
-		}
-};
-void printByGray(){
-	sortByGray();
-	for (int i = 0; i < ploys.size(); i++){
-		cout << *ploys[i];
-	}
-}
-//判断是否是组编号
-bool isGroupID(string & id){
-	for (int i = 0; i < groupIDS.size(); i++){
-		if (groupIDS[i] == id)
-			return true;
-	}
-	return false;
-}
-;
 int main(){
-	int n;
-	cin >> n;
-	
-	for (int i = 0; i < n; i++){
-		string ope;
-		cin >> ope;
-		if (ope == "Add"){
-			string option;
-			cin >> option;
-			
-				string id;
-				cin >> id;
-				ploy * p = new ploy(id,option);
-				ploys.push_back(p);
-			
-			continue;
-		}
-		if (ope == "Set"){
-			string id;
-			
-			cin >> id;
-			
-			int r, g, b;
-			cin >> r >> g >> b;
-			if (isGroupID(id)){
-				for (int i = 0; i < ploys.size(); i++){
-					if (ploys[i]->isBelonged(id)){
-						ploys[i]->setRGB(r, g, b);
-					}
-				}
-				continue;
-			}
-			
-			int index = findIndex(id);
-			if (index>=0)
-			{
-				ploys[index]->setRGB(r, g, b);
-
-			}
-			continue;
-		}
-		if (ope == "Group")
-		{
-			int number;
-			cin >> number;
-			vector<string> ids;
-			for (int i = 0; i < number; i++){
-				string  id;
-				cin >> id;
-				ids.push_back(id);
-			}
-			string group;
-			cin >> group;
-			groupIDS.push_back(group);
-			for (int i = 0; i < number; i++){
-				int index = findIndex(ids[i]);
-				if (index >= 0){
-					ploys[index]->addGroupID(group);
-				}
-			}
-		}
-		
-	
+	int num;
+	cin >> num;
+	for (int i = 0; i < num; i++){
+		operation();
 	}
-	string print;
-	cin >> print;
-	if (print == "Normal")
-		printById();
-	if (print == "Gray")
-		printByGray();
+	sort();
+	output();
+	//system("pause");
+	return 0;
 }
